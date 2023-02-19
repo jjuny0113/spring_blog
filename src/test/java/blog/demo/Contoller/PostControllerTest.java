@@ -5,8 +5,6 @@ import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
 import blog.demo.Request.PostEdit;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -143,6 +141,7 @@ class PostControllerTest {
 
         //then
     }
+
     @Test
     @DisplayName("글 여러개 조회")
     void test5() throws Exception {
@@ -152,7 +151,7 @@ class PostControllerTest {
                 .mapToObj(i -> Post
                         .builder()
                         .title("호돌맨 제목 " + i)
-                        .content("반포자이 " +  i)
+                        .content("반포자이 " + i)
                         .build())
                 .collect(Collectors.toList());
         postRepository.saveAll(requestPosts);
@@ -179,7 +178,7 @@ class PostControllerTest {
                 .mapToObj(i -> Post
                         .builder()
                         .title("호돌맨 제목 " + i)
-                        .content("반포자이 " +  i)
+                        .content("반포자이 " + i)
                         .build())
                 .collect(Collectors.toList());
         postRepository.saveAll(requestPosts);
@@ -212,7 +211,7 @@ class PostControllerTest {
         PostEdit postEdit = PostEdit.builder().title("호돌맨").content("초가집").build();
         //when
         mockMvc.perform(
-                        patch("/posts/{postId}",post.getId())
+                        patch("/posts/{postId}", post.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEdit))
                 )
@@ -237,9 +236,34 @@ class PostControllerTest {
         PostEdit postEdit = PostEdit.builder().title("호돌걸").content("반포자이").build();
         //when
         mockMvc.perform(
-                        patch("/posts/{postId}",post.getId())
+                        patch("/posts/{postId}", post.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(postEdit))
+                )
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        //then
+    }
+
+    @Test
+    @DisplayName("게지글 삭제")
+    void test9() throws Exception {
+        //given
+        Post post = Post
+                .builder()
+                .title("호돌맨")
+                .content("반포자이")
+                .build();
+
+        postRepository.save(post);
+
+
+        //when
+        mockMvc.perform(
+                        delete("/posts/{postId}", post.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+
                 )
                 .andExpect(status().isOk())
                 .andDo(print());
