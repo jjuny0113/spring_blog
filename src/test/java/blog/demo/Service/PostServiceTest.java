@@ -3,8 +3,10 @@ package blog.demo.Service;
 import blog.demo.Domain.Post;
 import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
+import blog.demo.Request.PostEdit;
 import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -88,6 +91,58 @@ class PostServiceTest {
         assertThat(posts.size()).isEqualTo(10L);
         assertThat(posts.get(0).getTitle()).isEqualTo("호돌맨 제목 30");
         assertThat(posts.get(4).getTitle()).isEqualTo("호돌맨 제목 26");
+
+    }
+
+    @Test
+    @DisplayName("글 제목 수정")
+    void test4() {
+        //given
+
+
+        Post post = Post
+                .builder()
+                .title("호돌맨")
+                .content("반포자이")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder().title("호돌걸").content("반포자이").build();
+
+        //when
+        postService.edit(post.getId(),postEdit);
+        //then
+        Post changedPost = postRepository.findById(post.getId())
+                .orElseThrow(() -> new RuntimeException("글이 존재하지 않습니다. id=" + post.getId()));
+        assertThat(changedPost.getTitle()).isEqualTo("호돌걸");
+        assertThat(changedPost.getContent()).isEqualTo("반포자이");
+
+    }
+
+    @Test
+    @DisplayName("글 내용 수정")
+    void test5() {
+        //given
+
+
+        Post post = Post
+                .builder()
+                .title("호돌맨")
+                .content("반포자이")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder().title("호돌맨").content("초가집").build();
+
+        //when
+        postService.edit(post.getId(),postEdit);
+        //then
+        Post changedPost = postRepository.findById(post.getId())
+                .orElseThrow(() -> new RuntimeException("글이 존재하지 않습니다. id=" + post.getId()));
+        assertThat(changedPost.getTitle()).isEqualTo("호돌맨");
+        assertThat(changedPost.getContent()).isEqualTo("초가집");
 
     }
 }

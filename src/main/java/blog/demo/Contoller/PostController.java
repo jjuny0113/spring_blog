@@ -1,7 +1,9 @@
 package blog.demo.Contoller;
 
 import blog.demo.Domain.Post;
+import blog.demo.Domain.PostEditor;
 import blog.demo.Request.PostCreate;
+import blog.demo.Request.PostEdit;
 import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
 import blog.demo.Service.PostService;
@@ -44,4 +46,10 @@ public class PostController {
     public List<PostResponse> getList(@ModelAttribute PostSearch postSearch){
         return postService.getList(postSearch);
     }
+
+    @PatchMapping("/posts/{postId}")
+    public PostResponse edit(@PathVariable Long postId, @RequestBody @Valid PostEdit request){
+        return postService.edit(postId, request);
+    }
+
 }

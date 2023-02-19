@@ -1,8 +1,10 @@
 package blog.demo.Service;
 
 import blog.demo.Domain.Post;
+import blog.demo.Domain.PostEditor;
 import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
+import blog.demo.Request.PostEdit;
 import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +13,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -61,5 +65,17 @@ public class PostService {
         return postRepository.getList(postSearch).stream()
                 .map(PostResponse::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PostResponse edit(Long id, PostEdit postEdit){
+        Post post = postRepository
+                .findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        PostEditor.PostEditorBuilder postEditorBuilder = post.toEditor();
+        PostEditor postEditor = postEditorBuilder.title(postEdit.getTitle()).content(postEdit.getContent()).build();
+        post.edit(postEditor);
+
+        return new PostResponse(post);
     }
 }
