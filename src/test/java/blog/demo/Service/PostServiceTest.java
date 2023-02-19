@@ -8,9 +8,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,28 +65,28 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("글 여러개 조회")
+    @DisplayName("글 1페이지 조회")
     void test3() {
         //given
 
-        postRepository.saveAll(List.of(
-                Post
+        List<Post> requestPosts = IntStream.range(1, 31)
+                .mapToObj(i -> Post
                         .builder()
-                        .title("foo1")
-                        .content("bar1")
-                        .build(),
-                Post
-                        .builder()
-                        .title("foo2")
-                        .content("bar2")
-                        .build()
-        ));
+                        .title("호돌맨 제목 " + i)
+                        .content("반포자이 " +  i)
+                        .build())
+                .collect(Collectors.toList());
+        postRepository.saveAll(requestPosts);
 
+        PageRequest pageable = PageRequest
+                .of(0, 5, Sort.by(Sort.Direction.DESC, "id"));
         //when
-        List<PostResponse> posts = postService.getList();
+        List<PostResponse> posts = postService.getList(pageable);
         //then
 
-        assertThat(posts.size()).isEqualTo(2L);
+        assertThat(posts.size()).isEqualTo(5L);
+        assertThat(posts.get(0).getTitle()).isEqualTo("호돌맨 제목 30");
+        assertThat(posts.get(4).getTitle()).isEqualTo("호돌맨 제목 26");
 
     }
 }

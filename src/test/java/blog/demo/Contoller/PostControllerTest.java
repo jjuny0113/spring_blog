@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -145,32 +147,23 @@ class PostControllerTest {
     void test5() throws Exception {
         //given
 
-        postRepository.saveAll(List.of(
-                        Post.builder()
-                                .title("foo1")
-                                .content("bar1")
-                                .build(),
-                        Post.builder()
-                                .title("foo2")
-                                .content("bar2")
-                                .build()
-                )
-
-        );
+        List<Post> requestPosts = IntStream.range(1, 31)
+                .mapToObj(i -> Post
+                        .builder()
+                        .title("호돌맨 제목 " + i)
+                        .content("반포자이 " +  i)
+                        .build())
+                .collect(Collectors.toList());
+        postRepository.saveAll(requestPosts);
         //when
         mockMvc.perform(
-                        get("/posts")
+                        get("/posts?page=1&sort=id,desc")
                                 .contentType(MediaType.APPLICATION_JSON)
-
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(2)))
-
-                .andExpect(jsonPath("$.[0].title").value("foo1"))
-                .andExpect(jsonPath("$.[0].content").value("bar1"))
-
-                .andExpect(jsonPath("$.[1].title").value("foo2"))
-                .andExpect(jsonPath("$.[1].content").value("bar2"))
+                .andExpect(jsonPath("$.length()", is(5)))
+                .andExpect(jsonPath("$[0].title").value("호돌맨 제목 30"))
+                .andExpect(jsonPath("$[0].content").value("반포자이 30"))
                 .andDo(print());
 
         //then
