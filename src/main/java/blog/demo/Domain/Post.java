@@ -23,4 +23,6 @@ public class Post {
         this.title = title;
         this.content = content;
     }
+
+    //절대 서비스의 정책을 넣지 말자!
 }

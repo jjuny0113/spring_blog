@@ -2,14 +2,14 @@ package blog.demo.Contoller;
 
 import blog.demo.Domain.Post;
 import blog.demo.Request.PostCreate;
+import blog.demo.Response.PostResponse;
 import blog.demo.Service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,5 +23,22 @@ public class PostController {
         postService.write(request);
         //repository.save(params)
 
+    }
+
+
+    /**
+     * /posts -> 글 전체 조회(검색 + 페이징)
+     * /posts/{postId} -> 글 한개만 조회
+     */
+
+    @GetMapping("/posts/{postId}")
+    public PostResponse get(@PathVariable Long postId){
+        return postService.get(postId);
+    }
+
+
+    @GetMapping("/posts")
+    public List<PostResponse> getList(){
+        return postService.getList();
     }
 }

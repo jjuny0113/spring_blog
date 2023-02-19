@@ -4,6 +4,8 @@ import blog.demo.Domain.Post;
 import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -113,5 +118,61 @@ class PostControllerTest {
         Post post = postRepository.findAll().get(0);
         assertThat(post.getTitle()).isEqualTo("제목입니다.");
         assertThat(post.getContent()).isEqualTo("내용입니다.");
+    }
+
+    @Test
+    @DisplayName("글 1개 조회")
+    void test4() throws Exception {
+        //given
+        Post post = Post.builder().title("foo182739812738712893719").content("bar").build();
+        postRepository.save(post);
+        //when
+        mockMvc.perform(
+                        get("/posts/{postId}", post.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(post.getId()))
+                .andExpect(jsonPath("$.title").value("foo1827398"))
+                .andExpect(jsonPath("$.content").value("bar"))
+                .andDo(print());
+
+        //then
+    }
+    @Test
+    @DisplayName("글 여러개 조회")
+    void test5() throws Exception {
+        //given
+
+        postRepository.saveAll(List.of(
+                        Post.builder()
+                                .title("foo1")
+                                .content("bar1")
+                                .build(),
+                        Post.builder()
+                                .title("foo2")
+                                .content("bar2")
+                                .build()
+                )
+
+        );
+        //when
+        mockMvc.perform(
+                        get("/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(2)))
+
+                .andExpect(jsonPath("$.[0].title").value("foo1"))
+                .andExpect(jsonPath("$.[0].content").value("bar1"))
+
+                .andExpect(jsonPath("$.[1].title").value("foo2"))
+                .andExpect(jsonPath("$.[1].content").value("bar2"))
+                .andDo(print());
+
+        //then
     }
 }
