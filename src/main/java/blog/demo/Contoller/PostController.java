@@ -2,6 +2,7 @@ package blog.demo.Contoller;
 
 import blog.demo.Domain.Post;
 import blog.demo.Request.PostCreate;
+import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
 import blog.demo.Service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class PostController {
 
 
     @GetMapping("/posts")
-    public List<PostResponse> getList(@PageableDefault(size = 5) Pageable pageable){
-        return postService.getList(pageable);
+    public List<PostResponse> getList(@ModelAttribute PostSearch postSearch){
+        return postService.getList(postSearch);
     }
 }

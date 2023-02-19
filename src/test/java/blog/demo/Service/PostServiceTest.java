@@ -3,6 +3,7 @@ package blog.demo.Service;
 import blog.demo.Domain.Post;
 import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
+import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,13 +79,13 @@ class PostServiceTest {
                 .collect(Collectors.toList());
         postRepository.saveAll(requestPosts);
 
-        PageRequest pageable = PageRequest
-                .of(0, 5, Sort.by(Sort.Direction.DESC, "id"));
+        PostSearch postSearch = PostSearch.builder().build();
+
         //when
-        List<PostResponse> posts = postService.getList(pageable);
+        List<PostResponse> posts = postService.getList(postSearch);
         //then
 
-        assertThat(posts.size()).isEqualTo(5L);
+        assertThat(posts.size()).isEqualTo(10L);
         assertThat(posts.get(0).getTitle()).isEqualTo("호돌맨 제목 30");
         assertThat(posts.get(4).getTitle()).isEqualTo("호돌맨 제목 26");
 
