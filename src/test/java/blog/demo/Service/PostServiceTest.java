@@ -134,7 +134,7 @@ class PostServiceTest {
 
         postRepository.save(post);
 
-        PostEdit postEdit = PostEdit.builder().title("호돌맨").content("초가집").build();
+        PostEdit postEdit = PostEdit.builder().title(null).content("초가집").build();
 
         //when
         postService.edit(post.getId(),postEdit);
