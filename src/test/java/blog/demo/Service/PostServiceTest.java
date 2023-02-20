@@ -1,26 +1,24 @@
 package blog.demo.Service;
 
 import blog.demo.Domain.Post;
+import blog.demo.Exception.PostNotFound;
 import blog.demo.Repository.PostRepository;
 import blog.demo.Request.PostCreate;
 import blog.demo.Request.PostEdit;
 import blog.demo.Request.PostSearch;
 import blog.demo.Response.PostResponse;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -77,7 +75,7 @@ class PostServiceTest {
                 .mapToObj(i -> Post
                         .builder()
                         .title("호돌맨 제목 " + i)
-                        .content("반포자이 " +  i)
+                        .content("반포자이 " + i)
                         .build())
                 .collect(Collectors.toList());
         postRepository.saveAll(requestPosts);
@@ -111,7 +109,7 @@ class PostServiceTest {
         PostEdit postEdit = PostEdit.builder().title("호돌걸").content("반포자이").build();
 
         //when
-        postService.edit(post.getId(),postEdit);
+        postService.edit(post.getId(), postEdit);
         //then
         Post changedPost = postRepository.findById(post.getId())
                 .orElseThrow(() -> new RuntimeException("글이 존재하지 않습니다. id=" + post.getId()));
@@ -137,7 +135,7 @@ class PostServiceTest {
         PostEdit postEdit = PostEdit.builder().title(null).content("초가집").build();
 
         //when
-        postService.edit(post.getId(),postEdit);
+        postService.edit(post.getId(), postEdit);
         //then
         Post changedPost = postRepository.findById(post.getId())
                 .orElseThrow(() -> new RuntimeException("글이 존재하지 않습니다. id=" + post.getId()));
@@ -147,8 +145,8 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("게시글 삭제")
-    void test6(){
+    @DisplayName("게시글 삭제 - 존재 하는 글")
+    void test6() {
 
         //given
         Post post = Post
@@ -163,4 +161,70 @@ class PostServiceTest {
         //then
         assertThat(postRepository.count()).isEqualTo(0);
     }
+
+    @Test
+    @DisplayName("글 1개 조회 예외처리")
+    void test7() {
+        //given
+        Post request = Post.builder().title("foo341234123412341234").content("bar").build();
+        postRepository.save(request);
+
+
+        //expected
+        assertThrows(PostNotFound.class, () -> {
+            postService.get(request.getId() + 1L);
+
+        });
+
+
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 - 존재하지 않는글")
+    void test8() {
+
+        Post post = Post
+                .builder()
+                .title("호돌맨")
+                .content("반포자이")
+                .build();
+
+        postRepository.save(post);
+        //then
+        assertThrows(PostNotFound.class, () -> {
+            postService.delete(post.getId() + 1L);
+
+        });
+
+    }
+
+    @Test
+    @DisplayName("글 내용 수정 - 존재하지 않는 글")
+    void test9() {
+        //given
+
+
+        Post post = Post
+                .builder()
+                .title("호돌맨")
+                .content("반포자이")
+                .build();
+
+        postRepository.save(post);
+
+        PostEdit postEdit = PostEdit.builder().title(null).content("초가집").build();
+
+        //when
+
+        //then
+
+        assertThrows(PostNotFound.class, () -> {
+            postService.edit(post.getId() + 1L, postEdit);
+
+        });
+
+    }
+
+
+
 }

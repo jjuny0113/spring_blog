@@ -222,31 +222,6 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("글 제목 수정")
-    void test8() throws Exception {
-        //given
-        Post post = Post
-                .builder()
-                .title("호돌맨")
-                .content("반포자이")
-                .build();
-
-        postRepository.save(post);
-
-        PostEdit postEdit = PostEdit.builder().title("호돌걸").content("반포자이").build();
-        //when
-        mockMvc.perform(
-                        patch("/posts/{postId}", post.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(postEdit))
-                )
-                .andExpect(status().isOk())
-                .andDo(print());
-
-        //then
-    }
-
-    @Test
     @DisplayName("게지글 삭제")
     void test9() throws Exception {
         //given
@@ -269,5 +244,53 @@ class PostControllerTest {
                 .andDo(print());
 
         //then
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 조회")
+    void test10() throws Exception {
+        mockMvc.perform(
+                        get("/posts/{postId}",1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+
+                )
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 수정")
+    void test11() throws Exception {
+        //given
+        PostEdit postEdit = PostEdit.builder().title("호돌걸").content("반포자이").build();
+        //expect
+        mockMvc.perform(patch("/posts/{postId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postEdit))
+                )
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글 작성시 제목에 '바보'는 포함될 수 없다.")
+    void test12() throws Exception {
+
+        PostCreate request = PostCreate
+                .builder()
+                .title("나는 바보입니다.")
+                .content("반포자이")
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+        mockMvc.perform(
+                        post("/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)
+                )
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+
+
     }
 }
